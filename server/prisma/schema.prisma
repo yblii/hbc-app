@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+    MEMBER
+    OFFICER
+}
+
+model User {
+    id       Int     @id @default(autoincrement())
+    name     String
+    email    String  @unique
+    password String
+    role     Role    @default(MEMBER)
+
+    isPaid   Boolean @default(false)
+
+    // many-to-one with Slip
+    slipId   Int?
+    slip     Slip?   @relation(fields: [slipId], references: [id])
+}
+
+model Slip {
+    id       Int    @id @default(autoincrement())
+    players  User[] // back reference - not an actual column in db, precomputed join by prisma
+
+    courtId  Int?   @unique
+    court    Court? @relation(fields: [courtId], references: [id])
+}
+
+model Court {
+    id             Int       @id @default(autoincrement())
+    activeSlip     Slip?
+    timerStartedAt DateTime?
+    timerEndsAt    DateTime?   
+}
