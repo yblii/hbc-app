@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import type { Group } from "../Types";
-import GroupCard from "../components/GroupCard";
+import type { Group } from "../../../Types";
+import GroupCard from "./GroupCard";
 
 function QueuePage() {
     const [groups, setGroups] = useState<Group[]>([]);
@@ -16,10 +16,25 @@ function QueuePage() {
             }
         }
         fetchData();
-    }, [])
+    }, [groups]);
 
-    const handleClick = () => {
-        console.log("Create New Slip clicked");
+    const createGroup = async () => {
+        const postData = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const newGroup = await response.json();
+                newGroup.players = [];
+                return newGroup;
+            } catch (error) {
+                console.error('Error creating group:', error);
+            }
+        }
+        setGroups([...groups, await postData()]);
     }
 
     return (
@@ -34,7 +49,7 @@ function QueuePage() {
             </ul>
 
             <button>
-                <a onClick={handleClick}>Create New Slip</a>
+                <a onClick={createGroup}>Create New Slip</a>
             </button>
         </div>
     )

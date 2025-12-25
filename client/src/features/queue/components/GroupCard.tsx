@@ -1,4 +1,4 @@
-import type { Player } from '../Types';
+import type { Player } from '../../../Types';
 
 function GroupCard({ players }: { players: Player[] }) {
     return (

@@ -21,9 +21,38 @@ app.get('/', (req, res) => {
   res.send('Badminton Club API is running!');
 });
 
+// GET all groups with their players
 app.get('/groups', async (req, res) => {
-  const groups = await prisma.group.findMany();
-  res.json(groups);
+    try {
+        const groups = await prisma.group.findMany({
+            include: {
+                players: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                }
+            }
+        });
+        res.json(groups);
+    } catch (error) {
+        console.error('Error fetching groups:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/groups', async (req, res) => {
+    try {
+        const newGroup = await prisma.group.create({
+            data: {
+                
+            }
+        });
+        res.status(201).json(newGroup);
+    } catch (error) {
+        console.error('Error creating group:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 app.listen(PORT, () => {
