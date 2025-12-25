@@ -1,10 +1,10 @@
 import './App.css'
-import SlipsPage from './pages/SlipsPage'
+import QueuePage from './features/queue/components/QueuePage'
 
 function App() {
   return (
     <>
-      <SlipsPage />
+      <QueuePage />
     </>
   )
 }
