@@ -3,6 +3,7 @@ import cors from 'cors';
 import { PrismaClient } from '../generated//prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
+import { auth } from 'express-oauth2-jwt-bearer';
 
 dotenv.config();
 
@@ -13,6 +14,14 @@ const prisma = new PrismaClient({ adapter })
 
 const app = express();
 const PORT = 3000;
+
+const jwtCheck = auth({
+    audience: process.env.AUTH0_AUDIENCE!,
+    issuerBaseURL:process.env.AUTH0_DOMAIN!,
+    tokenSigningAlg: 'RS256'
+});
+
+app.use(jwtCheck);
 
 app.use(cors());
 app.use(express.json());
