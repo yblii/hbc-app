@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react"
-import type { Slip } from "../Types";
-import SlipDisplay from "../components/Slip";
+import type { Group } from "../Types";
+import GroupCard from "../components/GroupCard";
 
-function SlipsPage() {
-    const [slips, setSlips] = useState<Slip[]>([]);
+function QueuePage() {
+    const [groups, setGroups] = useState<Group[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:3000/slips');
+                const response = await fetch('http://localhost:3000/groups');
                 const data = await response.json();
-                setSlips(data);
+                setGroups(data);
             } catch (error) {
-                console.error('Error fetching slips:', error);
+                console.error('Error fetching groups:', error);
             }
         }
         fetchData();
@@ -24,11 +24,11 @@ function SlipsPage() {
 
     return (
         <div>
-            <h1>Slips Page</h1>
+            <h1>Groups Page</h1>
             <ul>
-                {slips.map((slip) => (
-                    <li key={slip.id}>
-                        <SlipDisplay players={slip.players} />
+                {groups.map((group) => (
+                    <li key={group.id}>
+                        <GroupCard players={group.players} />
                     </li>
                 ))}
             </ul>
@@ -40,4 +40,4 @@ function SlipsPage() {
     )
 }
 
-export default SlipsPage;
+export default QueuePage;

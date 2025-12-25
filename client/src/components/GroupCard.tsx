@@ -1,6 +1,6 @@
 import type { Player } from '../Types';
 
-function SlipDisplay({ players }: { players: Player[] }) {
+function GroupCard({ players }: { players: Player[] }) {
     return (
         <div>
             <ul>
@@ -14,4 +14,4 @@ function SlipDisplay({ players }: { players: Player[] }) {
     )
 }
 
-export default SlipDisplay;
+export default GroupCard;

@@ -1,5 +1,5 @@
 import './App.css'
-import SlipsPage from './pages/SlipsPage'
+import SlipsPage from './pages/QueuePage'
 
 function App() {
   return (

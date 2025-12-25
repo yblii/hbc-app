@@ -13,7 +13,7 @@ async function main() {
   // 1. CLEANUP: Wipe the database so we start fresh every time
   // (Order matters! Delete relations first)
   await prisma.user.deleteMany()
-  await prisma.slip.deleteMany()
+  await prisma.group.deleteMany()
   await prisma.court.deleteMany()
   console.log('🧹 Database cleared.')
 
@@ -46,7 +46,7 @@ async function main() {
   })
 
   // -- A Group playing on Court 1 --
-  await prisma.slip.create({
+  await prisma.group.create({
     data: {
       // Connect to Court 1
       court: { connect: { id: 1 } },
@@ -72,7 +72,7 @@ async function main() {
   }) 
   
   // -- A Group Waiting in the Queue --
-  await prisma.slip.create({
+  await prisma.group.create({
     data: {
       players: {
         create: [

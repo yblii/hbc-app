@@ -27,12 +27,12 @@ model User {
 
     isPaid   Boolean @default(false)
 
-    // many-to-one with Slip
-    slipId   Int?
-    slip     Slip?   @relation(fields: [slipId], references: [id])
+    // many-to-one with group
+    groupId   Int?
+    group     Group?   @relation(fields: [groupId], references: [id])
 }
 
-model Slip {
+model Group {
     id       Int    @id @default(autoincrement())
     players  User[] // back reference - not an actual column in db, precomputed join by prisma
 
@@ -42,7 +42,7 @@ model Slip {
 
 model Court {
     id             Int       @id @default(autoincrement())
-    activeSlip     Slip?
+    activeGroup     Group?
     timerStartedAt DateTime?
     timerEndsAt    DateTime?   
 }

@@ -21,9 +21,9 @@ app.get('/', (req, res) => {
   res.send('Badminton Club API is running!');
 });
 
-app.get('/slips', async (req, res) => {
-  const slips = await prisma.slip.findMany();
-  res.json(slips);
+app.get('/groups', async (req, res) => {
+  const groups = await prisma.group.findMany();
+  res.json(groups);
 });
 
 app.listen(PORT, () => {
