@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import type { Group } from "../../../Types";
-import GroupCard from "./GroupCard";
+import GroupCard from "./group-card";
 
 function QueuePage() {
     const [groups, setGroups] = useState<Group[]>([]);
