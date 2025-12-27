@@ -15,6 +15,15 @@ const prisma = new PrismaClient({ adapter })
 const app = express();
 const PORT = 3000;
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
 const jwtCheck = auth({
     audience: process.env.AUTH0_AUDIENCE!,
     issuerBaseURL:process.env.AUTH0_DOMAIN!,
@@ -22,9 +31,6 @@ const jwtCheck = auth({
 });
 
 app.use(jwtCheck);
-
-app.use(cors());
-app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Badminton Club API is running!');
@@ -50,8 +56,14 @@ app.get('/groups', async (req, res) => {
     }
 });
 
-app.post('/groups', async (req, res) => {
+// POST creates a new group with user automatically added
+app.post('/groups', jwtCheck, async (req, res) => {
     try {
+        const userId = req.auth?.payload.sub;
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
         const newGroup = await prisma.group.create({
             data: {
                 

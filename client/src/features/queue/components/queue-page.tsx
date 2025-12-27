@@ -1,40 +1,30 @@
 import { useEffect, useState } from "react"
 import type { Group } from "../../../Types";
 import GroupCard from "./group-card";
+import { getGroups } from "../api/get-groups";
+import { createGroup } from "../api/create-group";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function QueuePage() {
     const [groups, setGroups] = useState<Group[]>([]);
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/groups');
-                const data = await response.json();
-                setGroups(data);
-            } catch (error) {
-                console.error('Error fetching groups:', error);
-            }
+    useEffect(() =>  {
+        const fetchGroups = async () =>  {
+            const groups = await getGroups(getAccessTokenSilently);
+            setGroups(groups);
         }
-        fetchData();
-    }, [groups]);
 
-    const createGroup = async () => {
-        const postData = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/groups', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const newGroup = await response.json();
-                newGroup.players = [];
-                return newGroup;
-            } catch (error) {
-                console.error('Error creating group:', error);
-            }
+        fetchGroups();
+    }, []);
+
+    const handleCreateGroup = async () => {
+        if(!isAuthenticated) return;
+
+        const newGroup = await createGroup(getAccessTokenSilently);
+        if (newGroup) {
+            setGroups([...groups, newGroup]);
         }
-        setGroups([...groups, await postData()]);
     }
 
     return (
@@ -48,8 +38,8 @@ function QueuePage() {
                 ))}
             </ul>
 
-            <button>
-                <a onClick={createGroup}>Create New Slip</a>
+            <button onClick={handleCreateGroup}>
+                Create New Slip
             </button>
         </div>
     )
