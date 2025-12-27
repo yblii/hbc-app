@@ -6,7 +6,7 @@ export async function getGroups() {
             players: {
                 select: {
                     id: true,
-                    name: true,
+                    firstName: true,
                 }
             }
         }

@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { auth } from 'express-oauth2-jwt-bearer';
 import router from './routes';
+import webhookRouter from './routes/webhooks.routes';
 
 dotenv.config();
 
@@ -18,15 +19,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const jwtCheck = auth({
+const checkJwt = auth({
     audience: process.env.AUTH0_AUDIENCE!,
     issuerBaseURL:process.env.AUTH0_DOMAIN!,
     tokenSigningAlg: 'RS256'
 });
 
-app.use(jwtCheck);
-
-app.use('/api', router);
+app.use('/api', checkJwt, router);
+app.use('/webhooks', webhookRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
