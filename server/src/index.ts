@@ -1,59 +1,32 @@
 import express from 'express';
 import cors from 'cors';
-import { PrismaClient } from '../generated//prisma/client.js';
-import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
+import { auth } from 'express-oauth2-jwt-bearer';
+import router from './routes';
+import webhookRouter from './routes/webhooks.routes';
 
 dotenv.config();
-
-const adapter = new PrismaPg({ 
-  connectionString: process.env.DATABASE_URL 
-});
-const prisma = new PrismaClient({ adapter })
 
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Badminton Club API is running!');
+const checkJwt = auth({
+    audience: process.env.AUTH0_AUDIENCE!,
+    issuerBaseURL:process.env.AUTH0_DOMAIN!,
+    tokenSigningAlg: 'RS256'
 });
 
-// GET all groups with their players
-app.get('/groups', async (req, res) => {
-    try {
-        const groups = await prisma.group.findMany({
-            include: {
-                players: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }
-            }
-        });
-        res.json(groups);
-    } catch (error) {
-        console.error('Error fetching groups:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-app.post('/groups', async (req, res) => {
-    try {
-        const newGroup = await prisma.group.create({
-            data: {
-                
-            }
-        });
-        res.status(201).json(newGroup);
-    } catch (error) {
-        console.error('Error creating group:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
+app.use('/api', checkJwt, router);
+app.use('/webhooks', webhookRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -19,13 +19,15 @@ enum Role {
 }
 
 model User {
-    id       Int     @id @default(autoincrement())
-    name     String
-    email    String  @unique
-    password String
-    role     Role    @default(MEMBER)
+    id        Int     @id @default(autoincrement())
+    auth0Id   String  @unique
 
-    isPaid   Boolean @default(false)
+    firstName String?
+    lastName  String?
+    email     String  @unique
+    
+    role      Role    @default(MEMBER)
+    isPaid    Boolean @default(false)
 
     // many-to-one with group
     groupId   Int?

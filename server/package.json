@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch -r dotenv/config src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "express-oauth2-jwt-bearer": "^1.7.2",
     "pg": "^8.16.3"
   },
   "devDependencies": {
