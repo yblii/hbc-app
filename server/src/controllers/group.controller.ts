@@ -4,10 +4,10 @@ import * as GroupService from '../services/group.service';
 export async function getGroups(req: Request, res: Response) {
     try {
         const groups = await GroupService.getGroups();
-        res.json(groups);
+        return res.json(groups);
     } catch(error) {
         console.error('Error fetching groups:', error);
-        res.status(500).json({ error: "failed to fetch groups" });
+        return res.status(500).json({ error: "failed to fetch groups" });
     }
 }
 
@@ -17,9 +17,10 @@ export async function createGroup(req: Request, res: Response) {
         if (!userId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
+
         res.json();
     } catch(error) {
         console.error('Error creating group:', error);
-        res.status(500).json({ error: "failed to create group" });
+        return res.status(500).json({ error: "failed to create group" });
     }
 }
