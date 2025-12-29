@@ -22,6 +22,7 @@ export const AuthenticationGuard = ({ component: Component }: AuthenticationGuar
           returnTo: window.location.pathname,
         },
       });
+      setLoading(false);
     }
 
     const checkUserProfile = async () => {
@@ -60,8 +61,12 @@ export const AuthenticationGuard = ({ component: Component }: AuthenticationGuar
   }
 
   // 2. While checking, or if redirecting, show a loader.
-  if (isLoading || loading || !isAuthenticated) {
+  if (isLoading || loading) {
     return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div>Redirecting...</div>;
   }
 
   if(!user?.firstName) {
