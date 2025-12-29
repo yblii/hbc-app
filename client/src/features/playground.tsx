@@ -1,7 +1,5 @@
-import { Button } from "../components/Button";
+import { Sidebar } from "../components/Sidebar";
 
 export default function Playground() {
-  return (<div>
-    <Button>test</Button>
-  </div>);
+  return <Sidebar></Sidebar>;
 }
