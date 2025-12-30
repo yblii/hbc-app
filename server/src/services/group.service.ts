@@ -23,12 +23,12 @@ export async function getGroups() {
 // Creates a new group and automatically adds the given user to the group
 // Returns: created Group with player
 // Parameters: User's auth0Id
-export async function createGroup(authId: string) {
+export async function createGroup(userId: number) {
     const newGroup = await prisma.group.create({
         data: {
             players:{
                 // connects user with given auth0Id to group
-                connect: { auth0Id: authId }
+                connect: { id: userId }
             }
         },
         include: {
@@ -41,7 +41,7 @@ export async function createGroup(authId: string) {
 
 // Given a user's id and group id, adds user to given group
 // Returns: user and group
-export async function addToGroup(authId: string, groupId: number) {
+export async function addToGroup(userId: number, groupId: number) {
     return await prisma.$transaction(async (tx) => {
         const group = await tx.group.findUnique({
             where: {
@@ -66,7 +66,7 @@ export async function addToGroup(authId: string, groupId: number) {
 
         const updatedUser = await tx.user.update({
             where: {
-                auth0Id: authId
+                id: userId
             },
             data: {
                 group: {
@@ -86,11 +86,11 @@ export async function addToGroup(authId: string, groupId: number) {
 
 // Given a user's id, removes user from their group
 // Returns: user and group
-export async function removeFromGroup(authId: string, groupId: number) {
+export async function removeFromGroup(userId: number, groupId: number) {
     return await prisma.$transaction(async (tx) => {
         const user = await tx.user.findUnique({
             where: {
-                auth0Id: authId
+                id: userId
             },
             select: {
                 id: true,

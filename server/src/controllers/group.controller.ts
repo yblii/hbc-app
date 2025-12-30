@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import * as GroupService from '../services/group.service';
-import Prisma from '@prisma/client'
 
 export async function getGroups(req: Request, res: Response) {
     try {
@@ -16,7 +15,7 @@ export async function getGroups(req: Request, res: Response) {
 // Sends url of new group and full entity
 export async function createGroup(req: Request, res: Response) {
     try {
-        const userId = req.userAuthId!;
+        const userId = req.userId!;
 
         const group = await GroupService.createGroup(userId);
         const loc = `/groups/${group.id}`;
@@ -30,7 +29,7 @@ export async function createGroup(req: Request, res: Response) {
 }
 
 export async function addToGroup(req: Request, res: Response) {
-    const authId = req.userAuthId!;
+    const userId = req.userId!;
 
     const { groupId: rawGroupId } = req.params;
     if (!rawGroupId) {
@@ -44,7 +43,7 @@ export async function addToGroup(req: Request, res: Response) {
     }
     
     try {
-        const group = await GroupService.addToGroup(authId, groupId);
+        const group = await GroupService.addToGroup(userId, groupId);
         return res.status(200).json(group);
     } catch(error) {
         console.error('Error joining group:', error);
@@ -53,7 +52,7 @@ export async function addToGroup(req: Request, res: Response) {
 }
 
 export async function removeFromGroup(req: Request, res: Response) {
-    const authId = req.userAuthId!;
+    const userId = req.userId!;
 
     const { groupId: rawGroupId } = req.params;
     if (!rawGroupId) {
@@ -67,7 +66,7 @@ export async function removeFromGroup(req: Request, res: Response) {
     }
 
     try {
-        const response = await GroupService.removeFromGroup(authId, groupId);
+        const response = await GroupService.removeFromGroup(userId, groupId);
         return res.status(200).json(response);
     } catch(error) {
         console.error('Error joining group:', error);

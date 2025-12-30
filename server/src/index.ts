@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { auth } from 'express-oauth2-jwt-bearer';
 import router from './routes';
 import webhookRouter from './routes/webhooks.routes';
+import { attatchUser } from './middleware/attatchUser';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const checkJwt = auth({
     tokenSigningAlg: 'RS256'
 });
 
-app.use('/api', checkJwt, router);
+app.use('/api', checkJwt, attatchUser, router);
 app.use('/webhooks', webhookRouter);
 
 app.listen(PORT, () => {
