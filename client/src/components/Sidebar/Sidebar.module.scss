@@ -1,0 +1,83 @@
+$sidebar-width: 250px;
+$sidebar-bg: #ebebed;       // Dark background
+$text-color: #161717;       // Muted text
+$text-hover: #191818;       // White on hover
+$active-bg: #4f46e5;        // Indigo for active state
+$mobile-breakpoint: 768px;
+$transition-speed: 0.2s;
+
+.sidebar {
+  width: $sidebar-width;
+  height: 100%;             // Fills the flex parent
+  background-color: $sidebar-bg;
+  color: $text-color;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding-right: 0.5rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+  // Logo Area
+  .logo {
+    padding: 24px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: $text-hover;
+    border-bottom: 1px solid rgba(11, 11, 11, 0.644);
+    margin-bottom: 20px;
+  }
+
+  // Navigation Links
+  nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0 8px;
+    gap: 8px; // Space between links
+
+    a {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: $text-color;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all $transition-speed ease;
+
+      // Icon spacing (if you have icons)
+      svg, i {
+        margin-right: 12px;
+        font-size: 1.2rem;
+      }
+
+      // Hover State
+      &:hover {
+        background-color: rgba(152, 142, 142, 0.153);
+        color: $text-hover;
+        transform: translateX(4px); // Subtle slide effect
+      }
+
+      // Active State (When user is on this page)
+      &.active {
+        background-color: $active-bg;
+        color: white;
+        box-shadow: 0 4px 12px rgba($active-bg, 0.3);
+      }
+    }
+  }
+
+  // Footer area (Logout, User profile, etc.)
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  // Responsive Hiding (The Logic)
+  @media (max-width: var(--mobile-breakpoint)) {
+    display: none;
+  }
+}
