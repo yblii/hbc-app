@@ -38,6 +38,8 @@ model Group {
     id       Int    @id @default(autoincrement())
     players  User[] // back reference - not an actual column in db, precomputed join by prisma
 
+    queueJoinTime DateTime @default(now())
+
     courtId  Int?   @unique
     court    Court? @relation(fields: [courtId], references: [id])
 }

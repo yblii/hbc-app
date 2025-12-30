@@ -1,12 +1,18 @@
 export type User = {
+  id: number;
   email: string;
   firstName?: string;
   lastName?: string;
 }
 
+export type GroupMember = {
+    id: number;
+    firstName: string;
+}
+
 export type Group = {
   id: number;
-  players: User[];
+  players: GroupMember[];
 }
 
 export type Court = {
