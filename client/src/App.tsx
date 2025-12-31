@@ -3,15 +3,18 @@ import './App.css'
 import { AuthenticationGuard } from './features/authentication/components/auth-guard'
 import LoginPage from './features/authentication/components/login-page'
 import QueuePage from './features/queue/components/QueuePage'
-import Playground from './features/playground'
+import { MobileLayout } from './components/MobileLayout'
 
 function App() {
   return (
     <>
         <Routes>
-            <Route path="/" element={<AuthenticationGuard component={QueuePage} />} />
-            <Route path="/test" element={<Playground />} />
-            <Route path="/login" element={<AuthenticationGuard component={LoginPage} />} />
+            <Route path="/" element={<AuthenticationGuard component={MobileLayout} />}>
+                <Route index element={<QueuePage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="profile" element={<LoginPage />} />
+                <Route path="timers" element={<LoginPage />} />
+            </Route>
         </Routes>
     </>
   )

@@ -5,6 +5,8 @@
     --accent-primary: #A677FF;
     --background: #F5F5F5;
     --primary: #FFFFFF;
+
+    --mobile-nav-height: 80px;
 }
 
 body {
