@@ -38,11 +38,6 @@ export async function createGroup(userId: number) {
             select: { groupId: true }
         });
         
-        let cleanup = null;
-        if(user?.groupId) {
-            cleanup = await _disconnectAndCleanup(userId, user.groupId, tx);
-        }
-
         const newGroup = await tx.group.create({
             data: {
                 players:{
@@ -59,6 +54,11 @@ export async function createGroup(userId: number) {
                 }
             }
         });
+
+        let cleanup = null;
+        if(user?.groupId) {
+            cleanup = await _cleanup(user.groupId, tx);
+        }
 
         return { group: newGroup, cleanup };
     })
@@ -88,17 +88,7 @@ export async function addToGroup(userId: number, groupId: number) {
 
         if(!group) { throw new Error("GroupNotFound") };
         if(group.players.length >= 4) { throw new Error("GroupFull"); }
-
-        let cleanup = null;
-        if(user?.groupId) {
-            // If already in this group, just return the current state
-            if(user.groupId === groupId) { 
-                return { group, cleanup: null }; 
-            }
-            // Otherwise, leave the old group first
-            cleanup = await _disconnectAndCleanup(userId, user.groupId, tx);
-        }
-
+        
         const updatedGroup = await tx.group.update({
             where: { id: groupId },
             data: {
@@ -113,6 +103,16 @@ export async function addToGroup(userId: number, groupId: number) {
                 }
             }
         });
+
+        let cleanup = null;
+        if(user?.groupId) {
+            // If already in this group, just return the current state
+            if(user.groupId === groupId) { 
+                return { group, cleanup: null }; 
+            }
+            // Otherwise, leave the old group first
+            cleanup = await _cleanup(user.groupId, tx);
+        }
 
         return { group: updatedGroup, cleanup };
     })
@@ -142,18 +142,18 @@ export async function removeFromGroup(userId: number, groupId: number) {
         if(!user || !user.groupId) { throw new Error("UserNotInGroup");}
         if(user.groupId !== groupId) { throw new Error("WrongGroup"); }
 
-        return _disconnectAndCleanup(user.id, groupId, tx);
+        await tx.user.update({
+            where: { id: userId },
+            data: { groupId: null }
+        });
+
+        return _cleanup(groupId, tx);
     }) 
 }
 
-async function _disconnectAndCleanup(userId: number, groupId: number, tx: Prisma.TransactionClient) {
-    // 1. Disconnect the user
-    await tx.user.update({
-        where: { id: userId },
-        data: { groupId: null }
-    });
+async function _cleanup(groupId: number, tx: Prisma.TransactionClient) {
 
-    // 2. Atomically delete the group ONLY if it has no players left
+    // 1. Atomically delete the group ONLY if it has no players left
     const { count } = await tx.group.deleteMany({
         where: {
             id: groupId,
@@ -165,7 +165,7 @@ async function _disconnectAndCleanup(userId: number, groupId: number, tx: Prisma
         return { type: 'DELETED', groupId };
     }
 
-    // 3. If not deleted, return the updated group state
+    // 2. If not deleted, return the updated group state
     const group = await tx.group.findUnique({
         where: { id: groupId },
         include: {

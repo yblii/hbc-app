@@ -19,3 +19,11 @@ export type Court = {
   id: number;
   activeGroup: Group | null; // might be null if court is empty
 }
+
+export type GroupCleanupData = {
+    type: "UPDATED";
+    group: Group;
+} | {
+    type: "DELETED";
+    groupId: number;
+};

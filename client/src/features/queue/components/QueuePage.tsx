@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Group } from "../../../Types";
+import type { Group, GroupCleanupData } from "../../../Types";
 import { getGroups } from "../api/get-groups";
 import { createGroup } from "../api/create-group";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -27,10 +27,10 @@ function QueuePage() {
         if(!isAuthenticated) return;
 
         try {
-            const newGroup = await createGroup(getAccessTokenSilently);
-            if (newGroup) {
-                setGroups((prevGroups) => [...prevGroups, newGroup]);
-            }
+            const { group, cleanup } = await createGroup(getAccessTokenSilently);
+            const newList = handleCleanup(cleanup);
+            newList.push(group);
+            setGroups(newList);
         } catch(err) {
             console.log(err);
         }
@@ -38,15 +38,30 @@ function QueuePage() {
 
     const handleJoinGroup = async (groupId: number) => {
         try {
-            const updatedGroup = await joinGroup(groupId, getAccessTokenSilently);
-            if (updatedGroup) {
-                setGroups((prevGroups) =>
-                    prevGroups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
-                );
-            }
+            const { group, cleanup } = await joinGroup(groupId, getAccessTokenSilently);
+            const newList = handleCleanup(cleanup);
+            setGroups(newList.map(g =>
+                g.id === group.id ? group : g
+            ))
+
         } catch(err) {
             console.log(err);
         }
+    }
+
+    const handleCleanup = (cleanup: GroupCleanupData) => {
+        let updatedList = [...groups];
+
+        if(cleanup) {
+            if(cleanup.type === 'DELETED') {
+                updatedList = updatedList.filter(g => g.id !== cleanup.groupId);
+            } else if(cleanup.type === 'UPDATED') {
+                updatedList = updatedList.map(g =>
+                    g.id === cleanup.group.id ? cleanup.group : g
+                );
+            }
+        }
+        return updatedList;
     }
 
     return (
