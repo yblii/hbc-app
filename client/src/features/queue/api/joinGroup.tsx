@@ -1,8 +1,8 @@
-export const getGroups = async (getAccessTokenSilently: () => Promise<string>) => {
+export async function joinGroup(groupId: number, getAccessTokenSilently: () => Promise<string>) {
     const token = await getAccessTokenSilently();
 
-    const response = await fetch(import.meta.env.VITE_API_URL + '/groups', {
-        method: 'GET',
+    const response = await fetch(import.meta.env.VITE_API_URL + `/groups/${groupId}/join`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`

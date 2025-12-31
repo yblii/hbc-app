@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { auth } from 'express-oauth2-jwt-bearer';
 import router from './routes';
 import webhookRouter from './routes/webhooks.routes';
+import { attatchUser } from './middleware/attatchUser';
 
 dotenv.config();
 

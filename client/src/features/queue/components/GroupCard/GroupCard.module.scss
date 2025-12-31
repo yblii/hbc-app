@@ -1,0 +1,64 @@
+// Variables for easy color adjustments
+$color-bg-tag: #E6D8FF; // Light purple match
+$radius: 8px;
+
+.group-card {
+  display: flex;
+  align-items: center;
+  width: max-content; // Fits content like the image
+  padding: 8px 12px;
+  border: 3px solid var(--dark-primary);
+  border-radius: $radius;
+  background-color: var(--primary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); // Optional: adds slight depth
+
+  // The Number Section (1)
+  &__rank {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dark-primary);
+    padding-right: 16px;
+    margin-right: 16px;
+    border-right: 3px solid var(--dark-primary); // The vertical divider line
+    align-self: stretch; // Ensures line stretches if card grows height
+    display: flex;
+    align-items: center;
+  }
+
+  // The Tag Grid Section
+  &__tags {
+    display: grid;
+    grid-template-columns: 1fr 1fr; // Creates the 2-column layout
+    gap: 6px; // Space between tags
+    
+    .tag {
+      background-color: var(--accent-light);
+      color: var(--dark-primary);
+      padding: 4px 16px;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+  }
+
+  // The 3-dot Menu
+  &__menu {
+    margin-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+    padding: 4px;
+
+    // Drawing the dots with CSS
+    span {
+      display: block;
+      width: 4px;
+      height: 4px;
+      background-color: var(--dark-primary);
+      border-radius: 50%;
+    }
+  }
+}

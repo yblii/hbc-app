@@ -2,7 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import { AuthenticationGuard } from './features/authentication/components/auth-guard'
 import LoginPage from './features/authentication/components/login-page'
-import QueuePage from './features/queue/components/queue-page'
+import QueuePage from './features/queue/components/QueuePage'
 import Playground from './features/playground'
 
 function App() {

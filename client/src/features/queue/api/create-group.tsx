@@ -15,7 +15,6 @@ export const createGroup= async (getAccessTokenSilently: () => Promise<string>) 
         } 
 
         const newGroup = await response.json();
-        newGroup.players = [];
         return newGroup;
     } catch (error) {
         console.error('Error creating group:', error);
