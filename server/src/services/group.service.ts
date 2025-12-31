@@ -1,3 +1,4 @@
+import type { Prisma } from '../../generated/prisma/browser';
 import { prisma } from '../lib/prisma';
 
 /**
@@ -31,61 +32,21 @@ export async function getGroups() {
  * @returns The newly created group, including the player list.
  */
 export async function createGroup(userId: number) {
-    const newGroup = await prisma.group.create({
-        data: {
-            players:{
-                // connects user with given auth0Id to group
-                connect: { id: userId }
-            }
-        },
-        include: {
-            players: {
-                select: {
-                    id: true,
-                    firstName: true,
-                }
-            }
-        }
-    });
-
-    return newGroup;
-}
-
-/**
- * Adds a user to a specific group if the group exists and is not full.
- *
- * @param userId - The internal database ID of the user joining the group.
- * @param groupId - The ID of the group to join.
- * @returns The updated group including the player list.
- * @throws {Error} If the group is not found or is full (max 4 players).
- */
-export async function addToGroup(userId: number, groupId: number) {
     return await prisma.$transaction(async (tx) => {
-        const group = await tx.group.findUnique({
-            where: {
-                id: groupId
-            },
-            include: {
-                _count: {
-                    select: {
-                        players: true
-                    }
-                }
-            }
-        })
-
-        if(!group) {
-            throw new Error("GroupNotFound");
+        const user = await tx.user.findUnique({
+            where: { id: userId },
+            select: { groupId: true }
+        });
+        
+        let cleanup = null;
+        if(user?.groupId) {
+            cleanup = await _disconnectAndCleanup(userId, user.groupId, tx);
         }
 
-        if(group._count.players >= 4) {
-            throw new Error("GroupFull");
-        }
-
-        return await tx.group.update({
-            where: { id: groupId },
+        const newGroup = await tx.group.create({
             data: {
-                players: {
+                players:{
+                    // connects user with given auth0Id to group
                     connect: { id: userId }
                 }
             },
@@ -98,6 +59,62 @@ export async function addToGroup(userId: number, groupId: number) {
                 }
             }
         });
+
+        return { group: newGroup, cleanup };
+    })
+}
+
+/**
+ * Adds a user to a specific group if the group exists and is not full.
+ *
+ * @param userId - The internal database ID of the user joining the group.
+ * @param groupId - The ID of the group to join.
+ * @returns The updated group including the player list.
+ * @throws {Error} If the group is not found or is full (max 4 players).
+ */
+export async function addToGroup(userId: number, groupId: number) {
+    return await prisma.$transaction(async (tx) => {
+        const user = await tx.user.findUnique({
+            where: { id: userId },
+            select: { groupId: true }
+        });
+
+        const group = await tx.group.findUnique({
+            where: { id: groupId },
+            include: { 
+                players: { select: { id: true, firstName: true } } 
+            }
+        })
+
+        if(!group) { throw new Error("GroupNotFound") };
+        if(group.players.length >= 4) { throw new Error("GroupFull"); }
+
+        let cleanup = null;
+        if(user?.groupId) {
+            // If already in this group, just return the current state
+            if(user.groupId === groupId) { 
+                return { group, cleanup: null }; 
+            }
+            // Otherwise, leave the old group first
+            cleanup = await _disconnectAndCleanup(userId, user.groupId, tx);
+        }
+
+        const updatedGroup = await tx.group.update({
+            where: { id: groupId },
+            data: {
+                players: { connect: { id: userId } }
+            },
+            include: {
+                players: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                    }
+                }
+            }
+        });
+
+        return { group: updatedGroup, cleanup };
     })
 }
 
@@ -122,43 +139,39 @@ export async function removeFromGroup(userId: number, groupId: number) {
             }
         });
 
-        if(!user || !user.groupId) {
-            throw new Error("UserNotInGroup");
-        }
+        if(!user || !user.groupId) { throw new Error("UserNotInGroup");}
+        if(user.groupId !== groupId) { throw new Error("WrongGroup"); }
 
-        if(user.groupId !== groupId) {
-            throw new Error("WrongGroup");
-        }
-
-        await tx.user.update({
-            where: { id: user.id },
-            data: {
-                group: { disconnect: true }
-            }
-        });
-
-        const remainingMembers = await tx.user.count({
-            where: { groupId: groupId }
-        });
-
-        if (remainingMembers === 0) {
-            await tx.group.delete({ where: { id: groupId } });
-            return { 
-                type: 'DELETED', 
-                groupId: groupId
-            };
-        }
-
-        // Scenario B: Group still exists (fetch fresh data to be safe)
-        const updatedGroup = await tx.group.findUnique({
-            where: { id: groupId },
-            include: { players: true }
-        });
-
-        return { 
-            type: 'UPDATED', 
-            group: updatedGroup 
-        };
+        return _disconnectAndCleanup(user.id, groupId, tx);
     }) 
+}
 
+async function _disconnectAndCleanup(userId: number, groupId: number, tx: Prisma.TransactionClient) {
+    // 1. Disconnect the user
+    await tx.user.update({
+        where: { id: userId },
+        data: { groupId: null }
+    });
+
+    // 2. Atomically delete the group ONLY if it has no players left
+    const { count } = await tx.group.deleteMany({
+        where: {
+            id: groupId,
+            players: { none: {} }
+        }
+    });
+
+    if (count > 0) {
+        return { type: 'DELETED', groupId };
+    }
+
+    // 3. If not deleted, return the updated group state
+    const group = await tx.group.findUnique({
+        where: { id: groupId },
+        include: {
+            players: { select: { id: true, firstName: true } }
+        }
+    });
+
+    return { type: 'UPDATED', group };
 }
