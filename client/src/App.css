@@ -1,5 +1,10 @@
 :root {
     --mobile-breakpoint: 768px;
+    --dark-primary: #383838;
+    --accent-light: #E5D7FF;
+    --accent-primary: #A677FF;
+    --background: #F5F5F5;
+    --primary: #FFFFFF;
 }
 
 body {

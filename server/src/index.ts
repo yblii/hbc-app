@@ -26,7 +26,7 @@ const checkJwt = auth({
     tokenSigningAlg: 'RS256'
 });
 
-app.use('/api', checkJwt, attatchUser, router);
+app.use('/api', checkJwt, router);
 app.use('/webhooks', webhookRouter);
 
 app.listen(PORT, () => {
