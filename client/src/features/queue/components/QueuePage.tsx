@@ -5,9 +5,15 @@ import { createGroup } from "../api/create-group";
 import { useAuth0 } from "@auth0/auth0-react";
 import GroupsList from "./GroupsList";
 import { joinGroup } from "../api/joinGroup";
+import JoinModal from "./JoinModal";
+import CreateModal from "./CreateModal/CreateModal";
 
 function QueuePage() {
     const [groups, setGroups] = useState<Group[]>([]);
+    const [showJoinGroupModal, setShowJoinGroupModal] = useState(false);
+    const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+    const [selectedGroup, setSelectedGroup] = useState(-1);
+
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
     useEffect(() =>  {
@@ -24,6 +30,7 @@ function QueuePage() {
     }, [getAccessTokenSilently]);
 
     const handleCreateGroup = async () => {
+        setShowCreateGroupModal(false);
         if(!isAuthenticated) return;
 
         try {
@@ -36,9 +43,12 @@ function QueuePage() {
         }
     }
 
-    const handleJoinGroup = async (groupId: number) => {
+    const handleJoinGroup = async () => {
+        setShowJoinGroupModal(false);
+        if (selectedGroup === -1) return;
+
         try {
-            const { group, cleanup } = await joinGroup(groupId, getAccessTokenSilently);
+            const { group, cleanup } = await joinGroup(selectedGroup, getAccessTokenSilently);
             const newList = handleCleanup(cleanup);
             setGroups(newList.map(g =>
                 g.id === group.id ? group : g
@@ -47,6 +57,11 @@ function QueuePage() {
         } catch(err) {
             console.log(err);
         }
+    }
+
+    const showJoinGroup = (groupId: number) => {
+        setSelectedGroup(groupId);
+        setShowJoinGroupModal(true);
     }
 
     const handleCleanup = (cleanup: GroupCleanupData) => {
@@ -67,11 +82,14 @@ function QueuePage() {
     return (
         <div>
             <h1>Groups Page</h1>
-            <GroupsList groups={groups} handleJoinGroup={handleJoinGroup} />
+            <GroupsList groups={groups} handleJoinGroup={showJoinGroup} />
 
-            <button onClick={handleCreateGroup}>
+            <button onClick={() => setShowCreateGroupModal(true)}>
                 New Group
             </button>
+
+            {showJoinGroupModal && <JoinModal handleJoinGroup={handleJoinGroup} closeModal={() => setShowJoinGroupModal(false)} />}
+            {showCreateGroupModal && <CreateModal handleCreateGroup={handleCreateGroup} closeModal={() => setShowCreateGroupModal(false)} />}
         </div>
     )
 }
