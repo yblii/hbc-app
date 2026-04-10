@@ -5,9 +5,10 @@ interface CardProps {
     place: number,
     group: Group,
     handleJoinGroup: (groupId: number) => void
+    handleLeaveGroup: (groupId: number) => void
 }
 
-function GroupCard({ place, group, handleJoinGroup }: CardProps) {
+function GroupCard({ place, group, handleJoinGroup, handleLeaveGroup }: CardProps) {
     const { id, players } = group;
 
     return (
@@ -30,11 +31,11 @@ function GroupCard({ place, group, handleJoinGroup }: CardProps) {
                     </button>
                 )}
             </div>
-            <div className={`${styles['group-card__menu']}`}>
+            <button className={`${styles['group-card__menu']}`} onClick={() => handleLeaveGroup(id)}>
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
         </div>
     )
 }

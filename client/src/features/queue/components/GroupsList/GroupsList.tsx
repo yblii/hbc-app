@@ -5,13 +5,20 @@ import styles from './GroupsList.module.scss';
 interface GroupsListProps {
     groups: Group[],
     handleJoinGroup: (groupId: number) => void
+    handleLeaveGroup: (groupId: number) => void
 }
 
-function GroupsList({ groups, handleJoinGroup }: GroupsListProps) {
+function GroupsList({ groups, handleJoinGroup, handleLeaveGroup }: GroupsListProps) {
     return (
         <div className={`${styles['groups-list']}`}>
             {groups.map((group, index) => (
-                <GroupCard key={group.id} place={index + 1} group={group} handleJoinGroup={handleJoinGroup} />
+                <GroupCard 
+                key={group.id} 
+                place={index + 1} 
+                group={group} 
+                handleJoinGroup={handleJoinGroup} 
+                handleLeaveGroup={handleLeaveGroup}
+                />
             ))}
         </div>
     );

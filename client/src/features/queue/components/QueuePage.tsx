@@ -4,7 +4,8 @@ import { getGroups } from "../api/get-groups";
 import { createGroup } from "../api/create-group";
 import { useAuth0 } from "@auth0/auth0-react";
 import GroupsList from "./GroupsList";
-import { joinGroup } from "../api/joinGroup";
+import { joinGroup } from "../api/join-group";
+import { leaveGroup } from "../api/leave-group";
 import JoinModal from "./JoinModal";
 import CreateModal from "./CreateModal/CreateModal";
 
@@ -35,9 +36,11 @@ function QueuePage() {
 
         try {
             const { group, cleanup } = await createGroup(getAccessTokenSilently);
-            const newList = handleCleanup(cleanup);
-            newList.push(group);
-            setGroups(newList);
+            setGroups(prevGroups => {
+                const cleanedList = handleCleanup(cleanup, prevGroups);
+                cleanedList.push(group);
+                return cleanedList;
+            });
         } catch(err) {
             console.log(err);
         }
@@ -49,12 +52,26 @@ function QueuePage() {
 
         try {
             const { group, cleanup } = await joinGroup(selectedGroup, getAccessTokenSilently);
-            const newList = handleCleanup(cleanup);
-            setGroups(newList.map(g =>
-                g.id === group.id ? group : g
-            ))
+            setGroups(prevGroups => {
+                const cleanedList = handleCleanup(cleanup, prevGroups);
+                return cleanedList.map(g => 
+                    g.id === group.id ? group : g
+                );
+            });
 
         } catch(err) {
+            console.log(err);
+        }
+    }
+
+    const handleLeaveGroup = async (groupId: number) => {
+        try {
+            const cleanup = await leaveGroup(groupId, getAccessTokenSilently);
+            if (!cleanup) return;    
+            setGroups((prevGroups) => {
+                return handleCleanup(cleanup, prevGroups);
+            });
+        } catch (err) {
             console.log(err);
         }
     }
@@ -64,8 +81,8 @@ function QueuePage() {
         setShowJoinGroupModal(true);
     }
 
-    const handleCleanup = (cleanup: GroupCleanupData) => {
-        let updatedList = [...groups];
+    const handleCleanup = (cleanup: GroupCleanupData, currGroups: Group[]) => {
+        let updatedList = [...currGroups];
 
         if(cleanup) {
             if(cleanup.type === 'DELETED') {
@@ -82,7 +99,7 @@ function QueuePage() {
     return (
         <div>
             <h1>Groups Page</h1>
-            <GroupsList groups={groups} handleJoinGroup={showJoinGroup} />
+            <GroupsList groups={groups} handleJoinGroup={showJoinGroup} handleLeaveGroup={handleLeaveGroup} />
 
             <button onClick={() => setShowCreateGroupModal(true)}>
                 New Group

@@ -1,4 +1,4 @@
-export const createGroup= async (getAccessTokenSilently: () => Promise<string>) => {
+export const createGroup = async (getAccessTokenSilently: () => Promise<string>) => {
     try {
         const token = await getAccessTokenSilently();
 
