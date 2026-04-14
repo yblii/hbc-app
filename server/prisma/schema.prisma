@@ -9,6 +9,11 @@ generator client {
   output   = "../generated/prisma"
 }
 
+generator openapi {
+  provider = "prisma-openapi"
+  output   = "../docs/" // Where to save the components
+}
+
 datasource db {
   provider = "postgresql"
 }
